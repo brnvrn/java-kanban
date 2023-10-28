@@ -1,5 +1,5 @@
+import manager.FileTaskManager;
 import manager.TaskManager;
-import manager.InTaskManager;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
@@ -8,8 +8,7 @@ import tasks.Task;
 public class Main {
 
     public static void main(String[] args) {
-        InTaskManager taskManager = new TaskManager(); // предположим, что у Вас есть класс TaskManager, реализующий интерфейс InTaskManager
-
+        TaskManager taskManager = new FileTaskManager();
         // Создание задач
         Task task1 = new Task("Task 1", "Description1", "NEW");
 

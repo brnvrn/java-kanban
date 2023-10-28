@@ -45,6 +45,10 @@ import java.util.Objects;
             return id == task.id && Objects.equals(name, task.name) && Objects.equals(status, task.status) &&
                     Objects.equals(description, task.description);
         }
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name, status, description);
+        }
 
         @Override
         public String toString() {

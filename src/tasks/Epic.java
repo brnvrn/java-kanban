@@ -1,8 +1,9 @@
 package tasks;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-    public class Epic extends Task {
+public class Epic extends Task {
         protected ArrayList<Integer> subtaskIds;
 
         public Epic(int id, String name, String description, String status) {
@@ -21,6 +22,19 @@ import java.util.ArrayList;
         }
         public void cleanSubtaskId() {
             subtaskIds.clear();
+        }
+
+        public String getName() {
+            return name;
+        }
+        public String getDescription() {
+            return description;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public void setDescription(String description) {
+            this.description = description;
         }
 
         @Override
