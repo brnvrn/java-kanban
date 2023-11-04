@@ -1,17 +1,21 @@
 package manager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
+import tasks.TaskStatus;
 
-public class FileTaskManager implements TaskManager {
+public class InMemoryTaskManager implements TaskManager {
 
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
     private int generatorId = 0;
+    private final  HistoryManager historyManager = Managers.getDefaultHistory();
+
 
     // a. Получение списка всех задач
     @Override
@@ -55,18 +59,24 @@ public class FileTaskManager implements TaskManager {
     // c. Получение задачи по идентификатору
     @Override
     public Task getTask(int id) {
-            return tasks.get(id);
+        Task task = tasks.get(id);
+        historyManager.add(task);
+            return task;
     }
 
     // Метод для получения эпика по идентификатору
     @Override
     public Epic getEpic(int id) {
-            return epics.get(id);
+        Epic epic = epics.get(id);
+        historyManager.add(epic);
+        return epic;
     }
     // Метод для получения подзадачи по идентификатору
     @Override
     public Subtask getSubtask(int id) {
-            return subtasks.get(id);
+        Subtask subtask = subtasks.get(id);
+        historyManager.add(subtask);
+        return subtask;
     }
 
     // d. Создание задачи
@@ -170,13 +180,20 @@ public class FileTaskManager implements TaskManager {
             }
         }
         return subtasksOfEpic;
+
     }
+
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+
     //Управление статусами
     private void updateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
 
         if (epic.getSubtaskIds().isEmpty()) {
-            epic.setStatus("NEW");
+            epic.setStatus(TaskStatus.NEW);
             return;
         }
 
@@ -185,21 +202,21 @@ public class FileTaskManager implements TaskManager {
 
         for (int subId : epic.getSubtaskIds()) {
             Subtask subtask = subtasks.get(subId);
-            String subtaskStatus = subtask.getStatus();
+            TaskStatus subtaskStatus = subtask.getStatus();
 
-            if (subtaskStatus.equals("IN_PROGRESS")) {
+            if (subtaskStatus == TaskStatus.IN_PROGRESS) {
                 inProgress = true;
-            } else if (!subtaskStatus.equals("DONE")) {
+            } else if (subtaskStatus != TaskStatus.DONE) {
                 allDone = false;
             }
         }
 
         if (inProgress) {
-            epic.setStatus("IN_PROGRESS");
+            epic.setStatus(TaskStatus.IN_PROGRESS);
         } else if (allDone) {
-            epic.setStatus("DONE");
+            epic.setStatus(TaskStatus.DONE);
         } else {
-            epic.setStatus("NEW");
+            epic.setStatus(TaskStatus.NEW);
         }
     }
 }
