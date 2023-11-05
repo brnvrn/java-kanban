@@ -11,16 +11,15 @@ public class InMemoryHistoryManager implements HistoryManager {
         history = new ArrayList<>();
     }
     public void add(Task task) {
-        if (task == null) {
-            return;
+        if (task != null) {
+            if (history.size() >= 10) {
+                history.remove(0);
+            }
+            history.add(task);
         }
-        if (history.size() >= 10) {
-            history.remove(0);
-        }
-        history.add(task);
     }
     public List<Task> getHistory() {
-        return history;
+        return new ArrayList<>(history);
     }
 
 }
