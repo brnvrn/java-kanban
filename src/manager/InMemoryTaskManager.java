@@ -56,6 +56,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.cleanSubtaskId();
             updateEpicStatus(epic.getId());
         }
+        subtasks.clear();
     }
 
     // c. Получение задачи по идентификатору
