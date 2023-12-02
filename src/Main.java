@@ -23,7 +23,7 @@ public class Main {
         // Создание подзадач
         Subtask subtask1 = new Subtask("Написать конфликтную ситуацию", "на рабочем месте", TaskStatus.NEW, epic1.getId());
         Subtask subtask2 = new Subtask("Оформить курсовую работу", "согласно ГОСТу", TaskStatus.NEW, epic1.getId());
-        Subtask subtask3 = new Subtask("Отснять видеоматериал", "в офисе", TaskStatus.IN_PROGRESS, epic2.getId());
+        Subtask subtask3 = new Subtask("Отснять видеоматериал", "в офисе", TaskStatus.IN_PROGRESS, epic1.getId());
 
         // Добавление задач, эпиков и подзадач в менеджер
         taskManager.addNewTask(task1);
@@ -64,17 +64,29 @@ public class Main {
         System.out.println("Эпик 2: " + epic2.getStatus());
 
         System.out.println("История просмотров:");
+        //запросите созданные задачи несколько раз в разном порядке;
         System.out.println(taskManager.getEpic(6));
-        System.out.println(taskManager.getSubtask(7));
-        System.out.println(taskManager.getEpic(5));
-        System.out.println(taskManager.getSubtask(9));
-        System.out.println(taskManager.getTask(3));
-        System.out.println(taskManager.getTask(4));
-        System.out.println(taskManager.getSubtask(8));
-        System.out.println(taskManager.getEpic(5));
+        System.out.println(taskManager.getHistory());
         System.out.println(taskManager.getSubtask(7));
         System.out.println(taskManager.getHistory());
-
+        System.out.println(taskManager.getSubtask(9));
+        System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getTask(3));
+        System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getTask(4));
+        System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getSubtask(8));
+        System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getEpic(5));
+        System.out.println(taskManager.getHistory());
+        System.out.println(taskManager.getSubtask(7));
+        System.out.println(taskManager.getHistory());
+        //удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться;
+        taskManager.deleteTask(4);
+        System.out.println(taskManager.getHistory());
+        //удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи
+        taskManager.deleteEpic(5);
+        System.out.println(taskManager.getHistory());
         // Удаление задачи и эпика
         taskManager.deleteTask(task2.getId());
         taskManager.deleteEpic(epic2.getId());
