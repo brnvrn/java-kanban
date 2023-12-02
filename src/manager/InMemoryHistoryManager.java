@@ -7,50 +7,40 @@ import java.util.List;
 import java.util.HashMap;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final List<Task> history;
+
     private final HashMap<Integer, Node> nodeMap;
 
 
     public InMemoryHistoryManager() {
-        history = new ArrayList<>();
         nodeMap = new HashMap<>();
     }
 
     public void add(Task task) {
         if (task != null) {
-            // Проверяем, есть ли задача в списке
-            if (nodeMap.containsKey(task.getId())) {
-                Node node = nodeMap.get(task.getId());
-                // Удаляем задачу из списка
+            Node node = nodeMap.get(task.getId());
+            if (node != null) {
                 removeNode(node);
             }
-
-            // Добавляем задачу в конец списка
             linkLast(task);
-
-            // Обновляем значение узла в HashMap
             nodeMap.put(task.getId(), tail);
-
-            // Проверяем размер списка и удаляем первую задачу, если необходимо
-            if (history.size() > 10) {
-                Task removedTask = history.remove(0);
-                nodeMap.remove(removedTask.getId());
-            }
         }
     }
 
     @Override
     public void remove(int id) {
-        if (nodeMap.containsKey(id)) {
-            Node node = nodeMap.get(id);
+        Node node = nodeMap.remove(id);
+        if (node != null) {
             removeNode(node);
-            history.remove(node.task);
-            nodeMap.remove(id);
         }
     }
 
+    @Override
+    public void removeAllHistory() {
+        nodeMap.clear();
+    }
+
     public List<Task> getHistory() {
-        return new ArrayList<>(history);
+        return new ArrayList<>(getTasks());
     }
 
     private Node head;

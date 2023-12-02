@@ -47,12 +47,14 @@ public class InMemoryTaskManager implements TaskManager {
         tasks.clear();
         epics.clear();
         subtasks.clear();
+        historyManager.removeAllHistory();
     }
 
     @Override
     public void removeAllEpics() {
         epics.clear();
         subtasks.clear();
+        historyManager.removeAllHistory();
     }
 
     @Override
@@ -62,6 +64,7 @@ public class InMemoryTaskManager implements TaskManager {
             updateEpicStatus(epic.getId());
         }
         subtasks.clear();
+        historyManager.removeAllHistory();
     }
 
     // c. Получение задачи по идентификатору
