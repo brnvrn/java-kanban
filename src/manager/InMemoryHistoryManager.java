@@ -37,6 +37,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void removeAllHistory() {
         nodeMap.clear();
+        head = null;
+        tail = null;
     }
 
     public List<Task> getHistory() {
@@ -60,7 +62,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     // Метод для получения всех задач из списка
-    public ArrayList<Task> getTasks() {
+    private ArrayList<Task> getTasks() {
         ArrayList<Task> tasks = new ArrayList<>();
         Node current = head;
         while (current != null) {
