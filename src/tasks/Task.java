@@ -8,6 +8,10 @@ import java.util.Objects;
         protected String name;
         protected TaskStatus status;
         protected String description;
+        protected TaskType type;
+
+        public Task() {
+        }
 
         public int getId() {
             return id;
@@ -16,9 +20,33 @@ import java.util.Objects;
         public void setId(int id) {
             this.id = id;
         }
+        public String getDescription() {
+            return description;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setType(TaskType type) {
+            this.type = type;
+        }
+
+        public TaskType getType() {
+            return type;
+        }
+
 
         public TaskStatus getStatus() {
             return status;
+        }
+
+        public String getName() {
+            return name;
         }
 
         public void setStatus(TaskStatus status) {
@@ -32,10 +60,11 @@ import java.util.Objects;
             this.status = status;
         }
 
-        public Task(String name, String description, TaskStatus status) {
+        public Task(String name, String description, TaskStatus status, TaskType type) {
             this.name = name;
             this.description = description;
             this.status = status;
+            this.type = type;
         }
 
         @Override
@@ -59,5 +88,8 @@ import java.util.Objects;
                     ", status='" + status + '\'' +
                     ", description='" + description + '\'' +
                     '}';
+        }
+
+        public void setEpic(String value) {
         }
     }

@@ -10,8 +10,8 @@ public class Epic extends Task {
             super(id, name, description, status);
         }
 
-        public Epic(String name,  String description, TaskStatus status) {
-            super(name, description, status);
+        public Epic(String name,  String description, TaskStatus status, TaskType type) {
+            super(name, description, status, type);
             subtaskIds = new ArrayList<>();
         }
         public void addSubtaskId (int id) {
@@ -24,20 +24,7 @@ public class Epic extends Task {
             subtaskIds.clear();
         }
 
-        public String getName() {
-            return name;
-        }
-        public String getDescription() {
-            return description;
-        }
-        public void setName(String name) {
-            this.name = name;
-        }
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        @Override
+    @Override
         public String toString() {
             return " tasks.Epic{" +
                     "№=" + id +

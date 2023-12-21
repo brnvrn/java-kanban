@@ -23,22 +23,19 @@ public class InMemoryTaskManager implements TaskManager {
     // a. Получение списка всех задач
     @Override
     public ArrayList<Task> getTasks() {
-        ArrayList<Task> taskArrayList = new ArrayList<>(tasks.values());
-        return taskArrayList;
+        return new ArrayList<>(tasks.values());
     }
 
     // Метод для получения списка всех подзадач
     @Override
     public ArrayList<Subtask> getSubtasks() {
-        ArrayList<Subtask> subtaskArrayList = new ArrayList<>(subtasks.values());
-        return subtaskArrayList;
+        return new ArrayList<>(subtasks.values());
     }
 
     // Метод для получения списка всех эпиков
     @Override
     public ArrayList<Epic> getEpics() {
-        ArrayList<Epic> epicArrayList = new ArrayList<>(epics.values());
-        return epicArrayList;
+        return new ArrayList<>(epics.values());
     }
 
     // b. Удаление всех задач
@@ -97,7 +94,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = ++generatorId;
         task.setId(id);
         tasks.put(id, task);
-        return id;
+        return task.getId();
     }
 
     @Override
@@ -125,7 +122,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         updateEpicStatus(epic.getId());
 
-        return id;
+        return subtask.getEpicId();
     }
 
     // e. Обновление задачи
@@ -208,7 +205,6 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getHistory() {
         return historyManager.getHistory();
     }
-
 
     //Управление статусами
     private void updateEpicStatus(int epicId) {

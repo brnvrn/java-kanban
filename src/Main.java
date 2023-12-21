@@ -1,95 +1,61 @@
 
-import manager.Managers;
-import manager.TaskManager;
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-import tasks.TaskStatus;
+import manager.FileBackedTasksManager;
+import tasks.*;
+
+import java.io.File;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = Managers.getDefault();
-        // Создание задач
-        Task task1 = new Task("Task 1", "Description1", TaskStatus.NEW);
+        FileBackedTasksManager taskManager = new FileBackedTasksManager(new File("data.csv"));
+        Task task1 = new Task("Task 1", "Description1", TaskStatus.NEW, TaskType.TASK);
 
-        Task task2 = new Task("Task 2", "Description2", TaskStatus.IN_PROGRESS);
+        Task task2 = new Task("Task 2", "Description2", TaskStatus.IN_PROGRESS, TaskType.TASK);
 
         // Создание эпиков
-        Epic epic1 = new Epic("Написать курсовую работу", "по маркетингу", TaskStatus.NEW);
-        Epic epic2 = new Epic("Смонтировать видеоролик", "про компанию", TaskStatus.IN_PROGRESS);
+        Epic epic1 = new Epic("Написать курсовую работу", "по маркетингу", TaskStatus.NEW, TaskType.EPIC);
+        Epic epic2 = new Epic("Смонтировать видеоролик", "про компанию", TaskStatus.IN_PROGRESS, TaskType.EPIC);
         final int epicId1 = taskManager.addNewEpic(epic1);
         final int epicId2 = taskManager.addNewEpic(epic2);
-        // Создание подзадач
-        Subtask subtask1 = new Subtask("Написать конфликтную ситуацию", "на рабочем месте", TaskStatus.NEW, epic1.getId());
-        Subtask subtask2 = new Subtask("Оформить курсовую работу", "согласно ГОСТу", TaskStatus.NEW, epic1.getId());
-        Subtask subtask3 = new Subtask("Отснять видеоматериал", "в офисе", TaskStatus.IN_PROGRESS, epic1.getId());
 
-        // Добавление задач, эпиков и подзадач в менеджер
+        // Создание подзадач
+        Subtask subtask1 = new Subtask("Написать конфликтную ситуацию", "на рабочем месте", TaskStatus.NEW, TaskType.SUBTASK, epicId1);
+        Subtask subtask2 = new Subtask("Оформить курсовую работу", "согласно ГОСТу", TaskStatus.NEW, TaskType.SUBTASK, epicId1);
+        Subtask subtask3 = new Subtask("Отснять видеоматериал", "в офисе", TaskStatus.IN_PROGRESS, TaskType.SUBTASK, epicId2);
+
+        // Создаем менеджер задач
+
+
+
+        // Добавляем задачи в менеджер
         taskManager.addNewTask(task1);
         taskManager.addNewTask(task2);
-        taskManager.addNewEpic(epic1);
-        taskManager.addNewEpic(epic2);
         taskManager.addNewSubtask(subtask1);
         taskManager.addNewSubtask(subtask2);
         taskManager.addNewSubtask(subtask3);
 
-        // Вывод списков задач, эпиков и подзадач
-        System.out.println("Список задач:");
-        for (Task task : taskManager.getTasks()) {
-            System.out.println(task);
-        }
+        // Запрашиваем задачи, чтобы заполнить историю просмотра
+        taskManager.getTask(3);
+        taskManager.getEpic(1);
+        taskManager.getEpic(2);
+        taskManager.getSubtask(5);
+        taskManager.getSubtask(6);
 
-        System.out.println("Список эпиков:");
-        for (Epic epic : taskManager.getEpics()) {
-            System.out.println(epic);
-        }
+        // Сохраняем текущее состояние менеджера в файл
+        taskManager.save();
 
-        System.out.println("Список подзадач:");
-        for (Subtask subtask : taskManager.getSubtasks()) {
-            System.out.println(subtask);
-        }
-
-        // Изменение статусов объектов
-        task1.setStatus(TaskStatus.DONE);
-        subtask3.setStatus(TaskStatus.DONE);
-        subtask2.setStatus(TaskStatus.IN_PROGRESS);
+        // Создаем новый менеджер из файла
+        FileBackedTasksManager newTaskManager = FileBackedTasksManager.loadFromFile(new File("data.csv"));
 
 
-        // Вывод обновленных статусов
-        System.out.println("Обновленные статусы:");
-        System.out.println("Задача 1: " + task1.getStatus());
-        System.out.println("Подзадача 2: " + subtask2.getStatus());
-        System.out.println("Подзадача 3: " + subtask3.getStatus());
-        System.out.println("Эпик 2: " + epic2.getStatus());
 
-        System.out.println("История просмотров:");
-        //запросите созданные задачи несколько раз в разном порядке;
-        System.out.println(taskManager.getEpic(6));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getSubtask(7));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getSubtask(9));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getTask(3));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getTask(4));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getSubtask(8));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getEpic(5));
-        System.out.println(taskManager.getHistory());
-        System.out.println(taskManager.getSubtask(7));
-        System.out.println(taskManager.getHistory());
-        //удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться;
-        taskManager.deleteTask(4);
-        System.out.println(taskManager.getHistory());
-        //удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи
-        taskManager.deleteEpic(5);
-        System.out.println(taskManager.getHistory());
-        // Удаление задачи и эпика
-        taskManager.deleteTask(task2.getId());
-        taskManager.deleteEpic(epic2.getId());
+        // Проверяем, что все задачи, эпики и подзадачи восстановлены
+        System.out.println("Восстановленный список задач: " + newTaskManager.getAllTasks()); // Выводит список задач
+        System.out.println("Восстановленная история просмотра задач: " + newTaskManager.getLoadHistory()); // Выводит идентификаторы задач из истории просмотров
+
+
+
     }
 }
 
