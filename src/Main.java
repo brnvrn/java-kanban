@@ -9,24 +9,20 @@ public class Main {
 
     public static void main(String[] args) {
         FileBackedTasksManager taskManager = new FileBackedTasksManager(new File("data.csv"));
-        Task task1 = new Task("Task 1", "Description1", TaskStatus.NEW, TaskType.TASK);
-
-        Task task2 = new Task("Task 2", "Description2", TaskStatus.IN_PROGRESS, TaskType.TASK);
+        Task task1 = new Task(TaskType.TASK, "Task 1", TaskStatus.NEW, "Description1");
+        Task task2 = new Task(TaskType.TASK, "Task 2", TaskStatus.IN_PROGRESS, "Description2");
 
         // Создание эпиков
-        Epic epic1 = new Epic("Написать курсовую работу", "по маркетингу", TaskStatus.NEW, TaskType.EPIC);
-        Epic epic2 = new Epic("Смонтировать видеоролик", "про компанию", TaskStatus.IN_PROGRESS, TaskType.EPIC);
+        Epic epic1 = new Epic(TaskType.EPIC, "Написать курсовую работу", TaskStatus.NEW, "про компанию");
+        Epic epic2 = new Epic(TaskType.EPIC, "Смонтировать видеоролик", TaskStatus.IN_PROGRESS, "про компанию");
+
         final int epicId1 = taskManager.addNewEpic(epic1);
         final int epicId2 = taskManager.addNewEpic(epic2);
 
         // Создание подзадач
-        Subtask subtask1 = new Subtask("Написать конфликтную ситуацию", "на рабочем месте", TaskStatus.NEW, TaskType.SUBTASK, epicId1);
-        Subtask subtask2 = new Subtask("Оформить курсовую работу", "согласно ГОСТу", TaskStatus.NEW, TaskType.SUBTASK, epicId1);
-        Subtask subtask3 = new Subtask("Отснять видеоматериал", "в офисе", TaskStatus.IN_PROGRESS, TaskType.SUBTASK, epicId2);
-
-        // Создаем менеджер задач
-
-
+        Subtask subtask1 = new Subtask(TaskType.SUBTASK,"Написать конфликтную ситуацию", TaskStatus.NEW, "на рабочем месте", epicId1);
+        Subtask subtask2 = new Subtask(TaskType.SUBTASK, "Оформить курсовую работу", TaskStatus.NEW, "согласно ГОСТу", epicId1);
+        Subtask subtask3 = new Subtask(TaskType.SUBTASK, "Отснять видеоматериал", TaskStatus.IN_PROGRESS, "в офисе", epicId2);
 
         // Добавляем задачи в менеджер
         taskManager.addNewTask(task1);
@@ -51,7 +47,7 @@ public class Main {
 
 
         // Проверяем, что все задачи, эпики и подзадачи восстановлены
-        System.out.println("Восстановленный список задач: " + newTaskManager.getAllTasks()); // Выводит список задач
+        System.out.println("Восстановленный список задач: " + newTaskManager.getLoadedTasks()); // Выводит список задач
         System.out.println("Восстановленная история просмотра задач: " + newTaskManager.getLoadHistory()); // Выводит идентификаторы задач из истории просмотров
 
 

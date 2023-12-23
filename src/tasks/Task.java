@@ -10,6 +10,16 @@ import java.util.Objects;
         protected String description;
         protected TaskType type;
 
+        public void setEpicId(int epicId) {
+            this.epicId = epicId;
+        }
+
+        protected int epicId;
+
+        public int getEpicId() {
+            return epicId;
+        }
+
         public Task() {
         }
 
@@ -60,7 +70,7 @@ import java.util.Objects;
             this.status = status;
         }
 
-        public Task(String name, String description, TaskStatus status, TaskType type) {
+        public Task(TaskType type, String name, TaskStatus status, String description) {
             this.name = name;
             this.description = description;
             this.status = status;

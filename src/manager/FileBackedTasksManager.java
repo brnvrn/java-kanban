@@ -14,18 +14,14 @@ import tasks.TaskType;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
     private final File saveFile;
+    private List<Task> loadedTasks;
     private List<Integer> loadHistory;
-    static List<Task> allTasks = new ArrayList<>();
 
 
     public FileBackedTasksManager(File saveFile) {
         this.saveFile = saveFile;
     }
 
-    @Override
-    public ArrayList<Task> getTasks() {
-        return super.getTasks();
-    }
     @Override
     public Task getTask(int id) {
         final Task task = super.getTask(id);
@@ -118,6 +114,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         super.deleteSubtask(id);
         save();
     }
+
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
             // Записываем заголовок файла
@@ -147,28 +144,38 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка при записи данных: " + e.getMessage());
+            throw new ManagerSaveException("Ошибка при записи данных: " + e.getMessage(), e);
         }
     }
 
     public String toString(Task task) {
-        return task.getId() + "," +
-                task.getType() + "," +
-                task.getName() + "," +
-                task.getStatus() + "," +
-                task.getDescription() + "," +
-                task.getId();
+        StringBuilder taskString = new StringBuilder();
+        taskString.append(task.getId()).append(",")
+                .append(task.getType()).append(",")
+                .append(task.getName()).append(",")
+                .append(task.getStatus()).append(",")
+                .append(task.getDescription()).append(",")
+                .append(task.getEpicId());
+        return taskString.toString();
     }
 
     public static Task fromString(String value) {
         final String[] values = value.split(",");
-        Task task = new Task();
+        Task task = null;
+        if (values[1].equals(TaskType.EPIC.toString())) {
+            task = new Epic();
+            task.setEpicId(Integer.parseInt(values[0]));
+        } else if (values[1].equals(TaskType.SUBTASK.toString())) {
+            task = new Subtask();
+            task.setEpicId(Integer.parseInt(values[5]));
+        } else {
+            task = new Task();
+        }
         task.setId(Integer.parseInt(values[0]));
         task.setType(TaskType.valueOf(values[1]));
         task.setName(values[2]);
         task.setStatus(TaskStatus.valueOf(values[3]));
         task.setDescription(values[4]);
-        task.setEpic(values[5]);
 
         return task;
     }
@@ -194,36 +201,42 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static FileBackedTasksManager loadFromFile(File file) {
         FileBackedTasksManager taskManager = new FileBackedTasksManager(file);
-        // Создаем новый список задач
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             // Пропустим первую строку с заголовком
             reader.readLine();
 
+            List<Task> tasks = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 Task task = fromString(line);
-                // Добавляем задачу в список
-                allTasks.add(task);
+                tasks.add(task);
             }
+
+            taskManager.setTasks(tasks);
 
             // Чтение истории просмотров
             String historyLine = reader.readLine();
             List<Integer> history = historyFromString(historyLine);
             taskManager.setHistory(history);
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка при чтении данных: " + e.getMessage());
+            throw new ManagerSaveException("Ошибка при чтении данных: " + e.getMessage(), e);
         }
+
         return taskManager;
     }
 
-    public List<Task> getAllTasks() {
-        return allTasks;
+    private void setTasks(List<Task> tasks) {
+        this.loadedTasks = tasks;
+    }
+    public List<Task> getLoadedTasks() {
+        return loadedTasks;
     }
     public List<Integer> getLoadHistory() {
         return this.loadHistory;
     }
-    public void setHistory(List<Integer> history) {
+
+    private void setHistory(List<Integer> history) {
         this.loadHistory = history;
     }
 }

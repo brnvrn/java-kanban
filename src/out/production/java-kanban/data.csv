@@ -1,10 +1,10 @@
 id,type,name,status,description,epic
-3,TASK,Task 1,NEW,Description1,3
-4,TASK,Task 2,IN_PROGRESS,Description2,4
-1,EPIC,Написать курсовую работу,NEW,по маркетингу,1
-2,EPIC,Смонтировать видеоролик,IN_PROGRESS,про компанию,2
-5,SUBTASK,Написать конфликтную ситуацию,NEW,на рабочем месте,5
-6,SUBTASK,Оформить курсовую работу,NEW,согласно ГОСТу,6
-7,SUBTASK,Отснять видеоматериал,IN_PROGRESS,в офисе,7
+3,TASK,Task 1,NEW,Description1,0
+4,TASK,Task 2,IN_PROGRESS,Description2,0
+1,EPIC,Написать курсовую работу,NEW,про компанию,0
+2,EPIC,Смонтировать видеоролик,IN_PROGRESS,про компанию,0
+5,SUBTASK,Написать конфликтную ситуацию,NEW,на рабочем месте,1
+6,SUBTASK,Оформить курсовую работу,NEW,согласно ГОСТу,1
+7,SUBTASK,Отснять видеоматериал,IN_PROGRESS,в офисе,2
 
 3,1,2,5,6,
