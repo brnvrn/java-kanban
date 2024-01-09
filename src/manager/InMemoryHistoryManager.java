@@ -10,7 +10,6 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private final HashMap<Integer, Node> nodeMap;
 
-
     public InMemoryHistoryManager() {
         nodeMap = new HashMap<>();
     }
@@ -25,7 +24,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             nodeMap.put(task.getId(), tail);
         }
     }
-
     @Override
     public void remove(int id) {
         Node node = nodeMap.remove(id);

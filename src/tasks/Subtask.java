@@ -4,8 +4,8 @@ package tasks;
 public class Subtask extends Task {
     protected int epicId;
 
-    public Subtask(int id, String name, String description, TaskStatus status, int epicId) {
-        super(id, name, description, status);
+    public Subtask(int id, TaskType type, String name, TaskStatus status, String description, int epicId) {
+        super(id, type, name, status, description);
         this.epicId = epicId;
     }
 
@@ -14,8 +14,8 @@ public class Subtask extends Task {
         this.epicId = epicId;
     }
 
-    public Subtask() {
-
+    public Subtask(int id, TaskType type, String name, TaskStatus status, String description) {
+        super(id, type, name, status, description);
     }
 
     @Override

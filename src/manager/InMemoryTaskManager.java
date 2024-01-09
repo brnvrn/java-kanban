@@ -13,12 +13,35 @@ import tasks.TaskStatus;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
-    private int generatorId = 0;
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected int generatorId = 0;
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
+    public void check(String historyLine) {
+        String[] ids = historyLine.split(",");
+
+        for (String idString : ids) {
+            try {
+                int id = Integer.parseInt(idString.trim());
+                if (tasks.containsKey(id)) {
+                    Task task = tasks.get(id);
+                    historyManager.add(task);
+                }
+                if (epics.containsKey(id)) {
+                    Epic epic = epics.get(id);
+                    historyManager.add(epic);
+                }
+                if (subtasks.containsKey(id)) {
+                    Subtask subtask = subtasks.get(id);
+                    historyManager.add(subtask);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Некорректное значение id: " + idString);
+            }
+        }
+    }
 
     // a. Получение списка всех задач
     @Override

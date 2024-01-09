@@ -9,15 +9,17 @@ import java.util.Objects;
         protected TaskStatus status;
         protected String description;
         protected TaskType type;
-
         public void setEpicId(int epicId) {
-            this.epicId = epicId;
-        }
 
+            this.epicId = epicId;
+
+        }
         protected int epicId;
 
         public int getEpicId() {
+
             return epicId;
+
         }
 
         public Task() {
@@ -63,11 +65,12 @@ import java.util.Objects;
             this.status = status;
         }
 
-        public Task(int id, String name, String description, TaskStatus status) {
+        public Task(int id, TaskType type, String name, TaskStatus status, String description) {
             this.id = id;
             this.name = name;
             this.description = description;
             this.status = status;
+            this.type = type;
         }
 
         public Task(TaskType type, String name, TaskStatus status, String description) {
@@ -98,8 +101,5 @@ import java.util.Objects;
                     ", status='" + status + '\'' +
                     ", description='" + description + '\'' +
                     '}';
-        }
-
-        public void setEpic(String value) {
         }
     }
