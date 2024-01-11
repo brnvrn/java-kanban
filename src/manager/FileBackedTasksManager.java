@@ -29,11 +29,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Task task1 = new Task(TaskType.TASK, "Task 1", TaskStatus.NEW, "Description1");
         taskManager.addNewTask(task1);
 
+
         // Запрашиваем задачи, чтобы заполнить историю просмотра
         taskManager.getTask(3);
         taskManager.getEpic(1);
         taskManager.getSubtask(2);
-
+        System.out.println("Восстановленный список эпиков: " + taskManager.getEpics());
+        System.out.println(taskManager.epics.get(subtask1.getEpicId()));
+        System.out.println(taskManager.getSubtasksOfEpic(epic1));
         // Создаем новый менеджер из файла
         FileBackedTasksManager newTaskManager = FileBackedTasksManager.loadFromFile(new File("data.csv"));
         System.out.println("Восстановленный список задач: " + newTaskManager.getTasks());
@@ -243,13 +246,20 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             String line;
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
                 Task task = fromString(line);
-
+            if (task.getId() > taskManager.generatorId) {
+                taskManager.generatorId = task.getId();
+            }
             switch (task.getType()) {
             case EPIC:
                 taskManager.epics.put(task.getId(), (Epic) task);
                 break;
             case SUBTASK:
-                taskManager.subtasks.put(task.getId(), (Subtask) task);
+                Subtask sub = (Subtask) task;
+                Epic epic = taskManager.epics.get(sub.getEpicId());
+                if (epic != null) {
+                    epic.addSubtaskId(sub.getId());
+                    taskManager.subtasks.put(task.getId(), sub);
+                }
                 break;
             default:
                 taskManager.tasks.put(task.getId(), task);
@@ -261,7 +271,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при чтении данных: " + e.getMessage(), e);
         }
-
         return taskManager;
     }
     @Override
@@ -279,7 +288,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return Objects.equals(this.tasks, manager.tasks) &&
                 Objects.equals(this.epics, manager.epics) &&
                 Objects.equals(this.subtasks, manager.subtasks) &&
-                Objects.equals(this.getHistory(), manager.getHistory());
+                Objects.equals(this.getHistory(), manager.getHistory()) &&
+                Objects.equals(this.generatorId, manager.generatorId);
     }
 
 }

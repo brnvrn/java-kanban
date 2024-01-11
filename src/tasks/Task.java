@@ -9,18 +9,6 @@ import java.util.Objects;
         protected TaskStatus status;
         protected String description;
         protected TaskType type;
-        public void setEpicId(int epicId) {
-
-            this.epicId = epicId;
-
-        }
-        protected int epicId;
-
-        public int getEpicId() {
-
-            return epicId;
-
-        }
 
         public Task() {
         }

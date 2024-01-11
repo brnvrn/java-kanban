@@ -19,24 +19,14 @@ public class InMemoryTaskManager implements TaskManager {
     protected int generatorId = 0;
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
-    public void check(String historyLine) {
-        String[] ids = historyLine.split(",");
-
-        for (String idString : ids) {
+    protected void check(String historyLine) {
+        for (String idString : historyLine.split(",")) {
             try {
                 int id = Integer.parseInt(idString.trim());
-                if (tasks.containsKey(id)) {
-                    Task task = tasks.get(id);
-                    historyManager.add(task);
-                }
-                if (epics.containsKey(id)) {
-                    Epic epic = epics.get(id);
-                    historyManager.add(epic);
-                }
-                if (subtasks.containsKey(id)) {
-                    Subtask subtask = subtasks.get(id);
-                    historyManager.add(subtask);
-                }
+                Task task = tasks.get(id);
+                if (task == null) task = subtasks.get(id);
+                if (task == null) task = epics.get(id);
+                if (task != null) historyManager.add(task);
             } catch (NumberFormatException e) {
                 System.out.println("Некорректное значение id: " + idString);
             }
