@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
     public class Task {
@@ -9,6 +10,8 @@ import java.util.Objects;
         protected TaskStatus status;
         protected String description;
         protected TaskType type;
+        protected int duration;
+        protected LocalDateTime startTime;
 
         public Task() {
         }
@@ -40,7 +43,6 @@ import java.util.Objects;
             return type;
         }
 
-
         public TaskStatus getStatus() {
             return status;
         }
@@ -60,12 +62,43 @@ import java.util.Objects;
             this.status = status;
             this.type = type;
         }
+        public Task(int id, TaskType type, String name, TaskStatus status, String description, int duration, LocalDateTime startTime) {
+            this.id = id;
+            this.name = name;
+            this.description = description;
+            this.status = status;
+            this.type = type;
+            this.duration = duration;
+            this.startTime = startTime;
+        }
+
 
         public Task(TaskType type, String name, TaskStatus status, String description) {
             this.name = name;
             this.description = description;
             this.status = status;
             this.type = type;
+        }
+        public int getDuration() {
+            return duration;
+        }
+
+        public void setDuration(int duration) {
+            this.duration = duration;
+        }
+
+        public LocalDateTime getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(LocalDateTime startTime) {
+            this.startTime =  startTime;
+        }
+        public LocalDateTime getEndTime() {
+            if (startTime != null && duration != 0) {
+                return startTime.plusMinutes(duration);
+            }
+            return null;
         }
 
         @Override
@@ -74,11 +107,12 @@ import java.util.Objects;
             if (o == null || getClass() != o.getClass()) return false;
             tasks.Task task = (tasks.Task) o;
             return id == task.id && Objects.equals(name, task.name) && Objects.equals(status, task.status) &&
-                    Objects.equals(description, task.description);
+                    Objects.equals(description, task.description)&& duration == task.duration &&
+                    Objects.equals(startTime, task.startTime);
         }
         @Override
         public int hashCode() {
-            return Objects.hash(id, name, status, description);
+            return Objects.hash(id, name, status, description, duration, startTime);
         }
 
         @Override
@@ -88,6 +122,8 @@ import java.util.Objects;
                     ", name='" + name + '\'' +
                     ", status='" + status + '\'' +
                     ", description='" + description + '\'' +
+                    ", duration=" + duration +
+                    ", startTime=" + startTime +
                     '}';
         }
     }
