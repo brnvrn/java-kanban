@@ -35,7 +35,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         taskmanager.save();
 
         assertTrue(saveFile.exists());
-        assertEquals(62, saveFile.length()); // записывается заголовок файла в 62 символа
+        assertEquals(75, saveFile.length()); // записывается заголовок файла в 62 символа
     }
 
     @Test
@@ -48,6 +48,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(1, taskmanager.getEpics().size());
         assertTrue(taskmanager.getTasks().isEmpty());
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -62,6 +63,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(1, taskmanager.getTasks().size());
         assertTrue(taskmanager.getEpics().isEmpty());
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -75,6 +77,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertTrue(newTasksManager.getTasks().isEmpty());
         assertTrue(newTasksManager.getEpics().isEmpty());
         assertTrue(newTasksManager.getSubtasks().isEmpty());
+        assertTrue(newTasksManager.getPrioritizedTasks().isEmpty());
         assertTrue(newTasksManager.getHistory().isEmpty());
     }
 
@@ -89,6 +92,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(1, newTasksManager.getEpics().size());
         assertTrue(newTasksManager.getTasks().isEmpty());
         assertTrue(newTasksManager.getSubtasks().isEmpty());
+        assertTrue(newTasksManager.getPrioritizedTasks().isEmpty());
     }
 
     @Test
@@ -103,6 +107,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         assertEquals(1, newTasksManager.getTasks().size());
         assertTrue(newTasksManager.getEpics().isEmpty());
         assertTrue(newTasksManager.getSubtasks().isEmpty());
+        assertEquals(1, newTasksManager.getPrioritizedTasks().size());
         assertTrue(newTasksManager.getHistory().isEmpty());
     }
 }

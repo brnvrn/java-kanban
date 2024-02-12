@@ -12,6 +12,7 @@ import tasks.TaskStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tasks.TaskType.*;
@@ -90,6 +91,24 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         assertTrue(subtasks.isEmpty());
     }
 
+    @Test
+    void testGetPrioritizedTasksStandardBehavior() {
+        taskmanager.addNewTask(task1);
+        taskmanager.addNewEpic(epic1);
+        Subtask subtask1 = new Subtask(2, SUBTASK, "Subtask3", TaskStatus.IN_PROGRESS, "Dessubtask3",
+                45, LocalDateTime.of(2024, 1, 15, 10, 11),2);
+        taskmanager.addNewSubtask(subtask1);
+
+        Set<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
+        assertEquals(2, prioritizedTasks.size());
+    }
+
+    @Test
+    void testGetPrioritizedTasksEmptyList() {
+        Set<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
+        assertTrue(prioritizedTasks.isEmpty());
+    }
+
     // b. Удаление всех задач
     @Test
     void testRemoveAllTasks_defaultBehavior() {
@@ -102,6 +121,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         assertTrue(taskmanager.getTasks().isEmpty());
         assertTrue(taskmanager.getEpics().isEmpty());
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -112,6 +132,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         assertTrue(taskmanager.getTasks().isEmpty());
         assertTrue(taskmanager.getEpics().isEmpty());
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -141,7 +162,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.addNewEpic(epic1);
         taskmanager.addNewSubtask(subtask1);
         Subtask subtask2 = new Subtask(5, SUBTASK, "Task3", TaskStatus.IN_PROGRESS, "Des3", 45,
-                LocalDateTime.of(2024, 1, 15, 10, 11), epic1.getId());
+                LocalDateTime.of(2024, 1, 19, 10, 11), epic1.getId());
 
         taskmanager.addNewSubtask(subtask2);
         taskmanager.removeAllSubtasks();
@@ -152,6 +173,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         }
 
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -163,6 +185,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         }
 
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertTrue(taskmanager.getHistory().isEmpty());
     }
 
@@ -173,6 +196,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task result = taskmanager.getTask(task1.getId());
 
         assertEquals(task1, result);
+        assertTrue(taskmanager.getPrioritizedTasks().contains(task1));
         assertTrue(taskmanager.getHistory().contains(task1));
     }
 
@@ -191,6 +215,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task result = taskmanager.getTask(999);
 
         assertNull(result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertFalse(taskmanager.getHistory().contains(999));
     }
 
@@ -230,6 +255,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Subtask result = taskmanager.getSubtask(subtask2.getId());
 
         assertEquals(subtask2, result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertTrue(taskmanager.getHistory().contains(subtask2));
     }
 
@@ -238,15 +264,18 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Subtask result = taskmanager.getSubtask(3);
 
         assertNull(result);
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertFalse(taskmanager.getHistory().contains(3));
     }
 
     @Test
     public void testGetSubtasksWithInvalidId() {
+        taskmanager.addNewEpic(epic1);
         taskmanager.addNewSubtask(subtask1);
         Subtask result = taskmanager.getSubtask(999);
 
         assertNull(result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertFalse(taskmanager.getHistory().contains(999));
     }
 
@@ -265,6 +294,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
         assertNotNull(tasks, "Задачи на возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertEquals(task1, tasks.get(0), "Задачи не совпадают.");
     }
 
@@ -278,6 +308,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
 
         assertEquals(1, taskId);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
         assertNull(savedTask);
     }
 
@@ -314,12 +345,16 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         final Subtask savedSubTask = taskmanager.getSubtask(subtask1.getId());
         assertNotNull(savedSubTask, "Подзадача не найдена.");
         assertEquals(subtask1, savedSubTask, "Подзадачи не совпадают.");
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
 
         final List<Subtask> subtasks = taskmanager.getSubtasks();
 
         assertNotNull(subtasks, "Подзадачи на возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
         assertEquals(subtask1, subtasks.get(0), "Подзадачи не совпадают.");
+        assertEquals(epic1.getStartTime(), subtask1.getStartTime());
+        assertEquals(epic1.getDuration(), subtask1.getDuration());
+        assertEquals(epic1.getEndTime(), subtask1.getEndTime());
     }
 
     @Test
@@ -330,21 +365,21 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Integer epicId = taskmanager.addNewSubtask(subtask1);
 
         assertNull(epicId);
+        assertEquals(0,taskmanager.getPrioritizedTasks().size());
         assertFalse(taskmanager.getSubtasks().contains(subtask1));
     }
 
     // e. Обновление задачи
     @Test
     public void testUpdateTaskWithValidTask() {
-
         taskmanager.addNewTask(task1);
-        Task updatedTask = new Task(1, TASK, "Task1", TaskStatus.NEW, "Des1", 60,
-                LocalDateTime.of(2024, 2, 29, 15, 10));
-        taskmanager.updateTask(updatedTask);
+        task1.setDuration(20);
+        taskmanager.updateTask(task1);
 
         Task result = taskmanager.getTask(1);
 
-        assertEquals(updatedTask, result);
+        assertEquals(task1, result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
     }
 
     @Test
@@ -354,6 +389,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task result = taskmanager.getTask(1);
 
         assertNull(result);
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
     }
 
     @Test
@@ -366,6 +402,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task result = taskmanager.getTask(1);
 
         assertEquals(task1, result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
     }
 
     @Test
@@ -412,6 +449,10 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
         assertNotNull(updatedSubtask);
         assertEquals("Updated Subtask", updatedSubtask.getName());
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
+        assertEquals(epic1.getStartTime(), subtask1.getStartTime());
+        assertEquals(epic1.getDuration(), subtask1.getDuration());
+        assertEquals(epic1.getEndTime(), subtask1.getEndTime());
     }
 
     @Test
@@ -422,6 +463,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Subtask updatedSubtask = taskmanager.getSubtask(subtask1.getId());
 
         assertNull(updatedSubtask);
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
     }
 
     @Test
@@ -429,12 +471,13 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.addNewEpic(epic1);
         taskmanager.addNewSubtask(subtask1);
         Subtask updatedSubtask = new Subtask(4, SUBTASK, "Task3", TaskStatus.IN_PROGRESS, "Des3",
-                45, LocalDateTime.of(2024, 1, 15, 10, 11), epic1.getId());
+                45, LocalDateTime.of(2024, 1, 10, 10, 11), epic1.getId());
         taskmanager.updateSubtask(updatedSubtask);
 
         Subtask result = taskmanager.getSubtask(2);
 
         assertEquals(subtask1, result);
+        assertEquals(1,taskmanager.getPrioritizedTasks().size());
     }
 
     // f. Удаление задачи по идентификатору
@@ -446,6 +489,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task deletedTask = taskmanager.getTask(1);
 
         assertNull(deletedTask);
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertFalse(taskmanager.getHistory().contains(task1));
     }
 
@@ -456,6 +500,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Task deletedTask = taskmanager.getTask(1);
 
         assertNull(deletedTask);
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertFalse(taskmanager.getHistory().contains(1));
     }
 
@@ -513,6 +558,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.deleteSubtask(subtask1.getId());
 
         assertNull(taskmanager.getSubtask(subtask1.getId()));
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertFalse(taskmanager.getHistory().contains(subtask1));
     }
 
@@ -521,6 +567,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.deleteSubtask(3);
 
         assertTrue(taskmanager.getSubtasks().isEmpty());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
         assertFalse(taskmanager.getHistory().contains(subtask1));
     }
 
@@ -529,6 +576,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.deleteSubtask(100);
 
         assertEquals(0, taskmanager.getSubtasks().size());
+        assertTrue(taskmanager.getPrioritizedTasks().isEmpty());
     }
 
     @Test

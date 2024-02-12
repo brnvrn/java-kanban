@@ -6,8 +6,6 @@ import tasks.*;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -161,7 +159,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public void save() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
             // Записываем заголовок файла
-            writer.write("id,type,name,status,description, duration, startTime, epic");
+            writer.write("id,type,name,status,description, duration, startTime, epicEndTime, epic");
             writer.newLine();
 
             // Записываем задачи
@@ -200,14 +198,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 .append(task.getDescription()).append(",")
                         .append(task.getDuration()).append(",")
                         .append(task.getStartTime());
-
         if (task instanceof Subtask) {
             Subtask subtask = (Subtask) task;
-            taskString.append(",").append(subtask.getEpicId());
+            taskString.append(",").append(",").append(subtask.getEpicId());
+        } else if (task instanceof Epic) {
+            Epic epic = (Epic) task;
+            taskString.append(",").append(epic.getEndTime());
         } else {
             taskString.append(",");
         }
-
         return taskString.toString();
     }
 
@@ -229,12 +228,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
               Epic epic = new Epic(id, type, name, status, description);
                 epic.setDuration(duration);
                 epic.setStartTime(startTime);
+                if (!values[7].equals("null")) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+                    LocalDateTime endTime = LocalDateTime.parse(values[7], formatter);
+                    epic.setEndTime(endTime);
+                }
                return epic;
             case SUBTASK:
                 Subtask subtask = new Subtask(id, type, name, status, description);
                 subtask.setDuration(duration);
                 subtask.setStartTime(startTime);
-                subtask.setEpicId(Integer.parseInt(values[7]));
+                subtask.setEpicId(Integer.parseInt(values[8]));
                 return subtask;
             default:
                 Task task =  new Task(id, type, name, status, description);
@@ -242,25 +246,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             task.setStartTime(startTime);
             return task;
         }
-    }
-
-    private static String historyToString(HistoryManager manager) {
-        StringBuilder historyString = new StringBuilder();
-        for (Task taskId : manager.getHistory()) {
-            historyString.append(taskId).append(",");
-        }
-        return historyString.toString();
-    }
-
-    private static List<Integer> historyFromString(String value) {
-        List<Integer> history = new ArrayList<>();
-        if (value != null && !value.isEmpty()) {
-            String[] values = value.split(",");
-            for (String taskId : values) {
-                history.add(Integer.parseInt(taskId));
-            }
-        }
-        return history;
     }
 
     public static FileBackedTasksManager loadFromFile(File file) {
@@ -282,19 +267,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 case SUBTASK:
                     Subtask sub = (Subtask) task;
                     Epic epic = taskManager.epics.get(sub.getEpicId());
-                    if (taskManager.isValidate(sub)) {
                         if (epic != null) {
                             epic.addSubtaskId(sub.getId());
                             taskManager.subtasks.put(task.getId(), sub);
-                        }
                         taskManager.prioritizedTasks.add(sub);
                     }
                     break;
                 default:
-                    if (taskManager.isValidate(task)) {
                         taskManager.tasks.put(task.getId(), task);
                         taskManager.prioritizedTasks.add(task);
-                    }
                 }
             }
             // Чтение истории просмотров
