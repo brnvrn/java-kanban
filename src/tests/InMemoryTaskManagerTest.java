@@ -38,7 +38,6 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         taskmanager.addNewSubtask(subtask2);
         taskmanager.addNewSubtask(subtask3);
         subtask3.getEndTime();
-        taskmanager.setEpicTime(epic1);
         // Проверка, что время начала и конца эпика установлены правильно
         assertEquals(LocalDateTime.of(2024, 1, 15, 10, 11), epic1.getStartTime());
         assertEquals(LocalDateTime.of(2024, 1, 15, 22, 55), epic1.getEndTime());
@@ -49,7 +48,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     void testSetEpicTimeWithEmptySubtasks() {
         Epic epic1 = new Epic(1, EPIC, "Epic1", TaskStatus.IN_PROGRESS, "Desepic1");
         taskmanager.addNewEpic(epic1);
-        taskmanager.setEpicTime(epic1);
+
         // Проверка, что время начала и конца эпика остались неизменными
         assertNull(epic1.getStartTime());
         assertNull(epic1.getEndTime());
