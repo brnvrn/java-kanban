@@ -59,12 +59,14 @@ public class Epic extends Task {
             return false;
         }
         Epic epic = (Epic) obj;
-        return Objects.equals(subtaskIds, epic.subtaskIds);
+        return Objects.equals(subtaskIds, epic.subtaskIds) &&
+                Objects.equals(endTime, epic.endTime);
     }
     @Override
     public int hashCode() {
         int code = super.hashCode();
         code = 31 * code + Objects.hashCode(subtaskIds);
+        code = 31 * code + Objects.hashCode(endTime);
         return code;
     }
     }

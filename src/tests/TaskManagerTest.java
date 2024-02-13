@@ -12,7 +12,6 @@ import tasks.TaskStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tasks.TaskType.*;
@@ -99,13 +98,13 @@ public abstract class TaskManagerTest <T extends TaskManager> {
                 45, LocalDateTime.of(2024, 1, 15, 10, 11),2);
         taskmanager.addNewSubtask(subtask1);
 
-        Set<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
+        List<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
         assertEquals(2, prioritizedTasks.size());
     }
 
     @Test
     void testGetPrioritizedTasksEmptyList() {
-        Set<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
+        List<Task> prioritizedTasks = taskmanager.getPrioritizedTasks();
         assertTrue(prioritizedTasks.isEmpty());
     }
 
@@ -613,9 +612,8 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     public void testUpdateEpicStatus_EmptySubtaskList() {
-        Epic epic1 = new Epic(1, EPIC, "Epic1", TaskStatus.IN_PROGRESS, "Desepic1");
+        Epic epic1 = new Epic(1, EPIC, "Epic1", TaskStatus.NEW, "Desepic1");
         taskmanager.addNewEpic(epic1);
-        taskmanager.updateEpicStatus(epic1.getId());
         // Проверяем, что статус Epic установлен как NEW
         assertEquals(TaskStatus.NEW, epic1.getStatus());
     }

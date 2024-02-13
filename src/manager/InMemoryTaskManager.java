@@ -39,8 +39,9 @@ public class InMemoryTaskManager implements TaskManager {
         return new ArrayList<>(epics.values());
     }
 
-    public Set<Task> getPrioritizedTasks() {
-        return prioritizedTasks;
+    @Override
+    public List<Task> getPrioritizedTasks() {
+    return new ArrayList<>(prioritizedTasks);
     }
 
     // b. Удаление всех задач
@@ -97,19 +98,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     // d. Создание задачи
     @Override
-    public int addNewTask(Task task) {
-        try {
-            if (isValidate(task)) {
-                int id = ++generatorId;
-                task.setId(id);
-                tasks.put(id, task);
-                prioritizedTasks.add(task);
-                return task.getId();
-            }
-        } catch (InvalidTaskException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+    public int addNewTask(Task task) throws InvalidTaskException {
+        if (isValidate(task)) {
+            int id = ++generatorId;
+            task.setId(id);
+            tasks.put(id, task);
+            prioritizedTasks.add(task);
         }
-        return -1;
+            return task.getId();
     }
 
     @Override
@@ -121,8 +117,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Integer addNewSubtask(Subtask subtask) {
-        try {
+    public Integer addNewSubtask(Subtask subtask) throws InvalidTaskException {
             if (isValidate(subtask)) {
                 Epic epic = epics.get(subtask.getEpicId());
                 if (epic == null) {
@@ -138,31 +133,21 @@ public class InMemoryTaskManager implements TaskManager {
 
                 updateEpicStatus(epic.getId());
                 setEpicTime(epic);
-
-                return subtask.getEpicId();
             }
-        } catch (InvalidTaskException e) {
-            System.out.println("Ошибка: " + e.getMessage());
-        }
-        return null;
+                return subtask.getEpicId();
+
     }
 
     // e. Обновление задачи
     @Override
-    public void updateTask(Task task) {
-        try {
+    public void updateTask(Task task) throws InvalidTaskException {
             if (isValidate(task)) {
                 int id = task.getId();
                 if (tasks.containsKey(id)) {
-                    tasks.put(task.getId(), task);
                     prioritizedTasks.remove(tasks.get(id));
+                    tasks.put(task.getId(), task);
                     prioritizedTasks.add(task);
                 }
-            } else {
-                throw new InvalidTaskException("Задача пересекается с другими задачами или подзадачами");
-            }
-        } catch (InvalidTaskException e) {
-            System.out.println("Ошибка при обновлении задачи: " + e.getMessage());
         }
     }
 
@@ -177,23 +162,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
-        try {
-            prioritizedTasks.remove(subtask);
+    public void updateSubtask(Subtask subtask) throws InvalidTaskException {
             if(isValidate(subtask)) {
                 Epic epic = epics.get(subtask.getEpicId());
                 int id = subtask.getId();
                 if (subtasks.containsKey(id)) {
+                    prioritizedTasks.remove(subtask);
                     subtasks.put(subtask.getId(), subtask);
                     prioritizedTasks.add(subtask);
                     updateEpicStatus(epic.getId());
                     setEpicTime(epic);
                 }
-            } else {
-                throw new InvalidTaskException("Задача пересекается с другими задачами или подзадачами");
-            }
-        } catch (InvalidTaskException e) {
-            System.out.println("Ошибка: " + e.getMessage());
         }
     }
 
@@ -324,6 +303,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!subtasks.isEmpty()) {
             LocalDateTime earliestStartTime = subtasks.get(0).getStartTime();
             LocalDateTime latestEndTime = subtasks.get(0).getEndTime();
+            int totalDurationMinutes = 0;
             for (Subtask subtask : subtasks) {
                 if (subtask.getStartTime().isBefore(earliestStartTime)) {
                     earliestStartTime = subtask.getStartTime();
@@ -331,12 +311,12 @@ public class InMemoryTaskManager implements TaskManager {
                 if (subtask.getEndTime().isAfter(latestEndTime)) {
                     latestEndTime = subtask.getEndTime();
                 }
+                Duration duration = Duration.between(subtask.getStartTime(), subtask.getEndTime());
+                totalDurationMinutes += (int) duration.toMinutes();
             }
-            Duration duration = Duration.between(earliestStartTime, latestEndTime);
-            int durationMinutes = (int) duration.toMinutes();
             epic.setStartTime(earliestStartTime);
             epic.setEndTime(latestEndTime);
-            epic.setDuration(durationMinutes);
+            epic.setDuration(totalDurationMinutes);
         }
     }
 }

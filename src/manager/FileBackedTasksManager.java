@@ -23,6 +23,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         subtask1.setDuration(60);
         subtask1.setStartTime(LocalDateTime.of(2024, 1, 29, 15, 5));
         taskManager.addNewSubtask(subtask1);
+        subtask1.setDescription("22");
+        taskManager.updateSubtask(subtask1);
         taskManager.setEpicTime(epic1);
         // Создание подзадачи, которая пересекается
         Subtask subtask2 = new Subtask(TaskType.SUBTASK, "Sub2", TaskStatus.NEW,"des2", epicId1);

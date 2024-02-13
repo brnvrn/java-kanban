@@ -42,7 +42,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         // Проверка, что время начала и конца эпика установлены правильно
         assertEquals(LocalDateTime.of(2024, 1, 15, 10, 11), epic1.getStartTime());
         assertEquals(LocalDateTime.of(2024, 1, 15, 22, 55), epic1.getEndTime());
-        assertEquals(764, epic1.getDuration());
+        assertEquals(105, epic1.getDuration());
     }
 
     @Test
