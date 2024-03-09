@@ -9,6 +9,7 @@ import tasks.Subtask;
 import tasks.Task;
 import tasks.TaskStatus;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
             45, LocalDateTime.of(2024, 1, 15, 10, 11), epic1.getId());
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
     }
 
     @AfterEach
