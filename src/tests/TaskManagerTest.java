@@ -592,7 +592,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskmanager.addNewSubtask(subtask1);
         taskmanager.addNewSubtask(subtask2);
 
-        List<Subtask> subtasksOfEpic = taskmanager.getSubtasksOfEpic(epic1);
+        List<Subtask> subtasksOfEpic = taskmanager.getSubtasksOfEpic(epic1.getId());
 
         assertNotNull(subtasksOfEpic);
         assertEquals(2, subtasksOfEpic.size());
@@ -605,7 +605,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         Epic epic1 = new Epic(1, EPIC, "Epic1", TaskStatus.IN_PROGRESS, "Desepic1");
         taskmanager.addNewEpic(epic1);
 
-        List<Subtask> subtasksOfEpic = taskmanager.getSubtasksOfEpic(epic1);
+        List<Subtask> subtasksOfEpic = taskmanager.getSubtasksOfEpic(epic1.getId());
 
         assertNotNull(subtasksOfEpic);
         assertTrue(subtasksOfEpic.isEmpty());

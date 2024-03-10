@@ -53,7 +53,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleGetTasksEndpoint() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/task/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -72,7 +72,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleGetEpicsEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
-        httpManager.saveToServer();
+        httpManager.save();
 
         URI url = URI.create("http://localhost:8080/tasks/epic/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
@@ -92,7 +92,7 @@ HttpTaskServer httpTaskServer;
     void testHandleGetSubtasksEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
         httpManager.addNewSubtask(subtask1);
-        httpManager.saveToServer();
+        httpManager.save();
 
         URI url = URI.create("http://localhost:8080/tasks/subtask/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
@@ -158,7 +158,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleGetPrioritizedTasksEndpoint() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -193,7 +193,7 @@ HttpTaskServer httpTaskServer;
     void testHandleGetHistoryEndpoint() throws Exception {
         httpManager.addNewTask(task1);
         httpManager.getTask(1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/history/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -226,7 +226,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleGetTaskByIdEndpoint() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/task?id=1");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -242,6 +242,7 @@ HttpTaskServer httpTaskServer;
                 "{\"hour\":15,\"minute\":10,\"second\":0,\"nano\":0}}}";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleGetTaskByIdEndpointEmpty() throws Exception {
         URI url = URI.create("http://localhost:8080/tasks/task?id=1");
@@ -256,10 +257,11 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Задача с id 1 не найдена";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleGetTaskByIdEndpointWithInvalidId() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/task?id=2");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -276,7 +278,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleGetEpicByIdEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/epic?id=1");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -306,10 +308,11 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Эпик с id 1 не найден";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleGetEpicByIdEndpointWithInvalidId() throws Exception {
         httpManager.addNewEpic(epic1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/epic?id=2");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -322,11 +325,12 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Эпик с id 2 не найден";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleGetSubtaskByIdEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
         httpManager.addNewSubtask(subtask1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/subtask?id=2");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -357,11 +361,12 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Сабтаска с id 1 не найдена";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleGetSubtaskByIdEndpointEmptyWithInvalidId() throws Exception {
         httpManager.addNewEpic(epic1);
         httpManager.addNewSubtask(subtask1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/subtask?id=3");
         HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
 
@@ -374,10 +379,30 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Сабтаска с id 3 не найдена";
         assertEquals(expectedResponse, response.body());
     }
+
+    @Test
+    void testHandleGetSubtaskOfEpicEndpoint() throws Exception {
+        httpManager.addNewEpic(epic1);
+        httpManager.addNewSubtask(subtask1);
+        httpManager.save();
+        URI url = URI.create("http://localhost:8080/tasks/subtasks/epic/?id=1");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).GET().build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Проверяем, что статус ответа равен 200 (OK)
+        assertEquals(200, response.statusCode());
+
+        // Проверяем, что ответ содержит ожидаемый JSON с задачами
+        String expectedResponse = "[Subtask{id=2, name='Subtask3', status=IN_PROGRESS, description='Dessubtask3'," +
+                " duration=45, startTime=2024-01-15T10:11}]";
+        assertEquals(expectedResponse, response.body());
+    }
+
     @Test
     void testHandleDeleteTaskEndpoint() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/task/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
 
@@ -390,10 +415,11 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Все задачи удалены";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleDeleteEpicEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/epic/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
 
@@ -411,7 +437,7 @@ HttpTaskServer httpTaskServer;
     void testHandleDeleteSubtaskEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
         httpManager.addNewSubtask(subtask1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/subtask/");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
 
@@ -424,10 +450,11 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Все сабтаски удалены";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandleDeleteTaskByIdEndpoint() throws Exception {
         httpManager.addNewTask(task1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/task?id=1");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
 
@@ -445,7 +472,7 @@ HttpTaskServer httpTaskServer;
     @Test
     void testHandleDeleteEpicByIdEndpoint() throws Exception {
         httpManager.addNewEpic(epic1);
-        httpManager.saveToServer();
+        httpManager.save();
         URI url = URI.create("http://localhost:8080/tasks/epic?id=1");
         HttpRequest request = HttpRequest.newBuilder().uri(url).DELETE().build();
 
@@ -459,6 +486,7 @@ HttpTaskServer httpTaskServer;
         String expectedResponse = "Эпик с id 1 удален";
         assertEquals(expectedResponse, response.body());
     }
+
     @Test
     void testHandlePostTaskEndpont() throws Exception {
         URI url = URI.create("http://localhost:8080/tasks/task/");
@@ -512,4 +540,76 @@ HttpTaskServer httpTaskServer;
         assertEquals(expectedResponse, response.body());
     }
 
+    @Test
+    void testHandleUpdateTaskEndpont() throws Exception {
+        URI url = URI.create("http://localhost:8080/tasks/task");
+        Gson gson = new Gson();
+        String json = gson.toJson(task1);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(body).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        // Проверяем, что статус ответа равен 200 (OK)
+
+        Task task1 = new Task(1, TASK, "Task2", TaskStatus.NEW, "Des1", 60,
+                LocalDateTime.of(2024, 1, 29, 15, 10));
+        assertEquals(200, response.statusCode());
+        String json1 = gson.toJson(task1);
+        final HttpRequest.BodyPublisher body1 = HttpRequest.BodyPublishers.ofString(json1);
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(body1).build();
+        HttpResponse<String> response1 = client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        // Проверяем, что ответ содержит ожидаемый JSON с задачами
+        String expectedResponse = "Задача обновлена";
+        assertEquals(expectedResponse, response1.body());
+    }
+
+    @Test
+    void testHandleUpdateEpicEndpont() throws Exception {
+        URI url = URI.create("http://localhost:8080/tasks/epic");
+        Gson gson = new Gson();
+        String json = gson.toJson(epic1);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(body).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        // Проверяем, что статус ответа равен 200 (OK)
+
+        Epic epic1 = new Epic(1, EPIC, "Epic1", TaskStatus.IN_PROGRESS, "Desepic1");
+
+        assertEquals(200, response.statusCode());
+        String json1 = gson.toJson(epic1);
+        final HttpRequest.BodyPublisher body1 = HttpRequest.BodyPublishers.ofString(json1);
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(body1).build();
+        HttpResponse<String> response1 = client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        // Проверяем, что ответ содержит ожидаемый JSON с задачами
+        String expectedResponse = "Эпик обновлен";
+        assertEquals(expectedResponse, response1.body());
+    }
+
+    @Test
+    void testHandleUpdateSubtaskEndpont() throws Exception {
+        httpManager.addNewEpic(epic1);
+        URI url = URI.create("http://localhost:8080/tasks/subtask");
+        Gson gson = new Gson();
+        String json = gson.toJson(subtask1);
+        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(body).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        Subtask subtask1 = new Subtask(2, SUBTASK, "Subtask4", TaskStatus.IN_PROGRESS, "Dessubtask3",
+                45, LocalDateTime.of(2024, 1, 15, 10, 11), 1);
+        String json1 = gson.toJson(subtask1);
+        final HttpRequest.BodyPublisher body1 = HttpRequest.BodyPublishers.ofString(json1);
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(body1).build();
+        HttpResponse<String> response1 = client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        // Проверяем, что статус ответа равен 200 (OK)
+        assertEquals(200, response1.statusCode());
+
+
+        // Проверяем, что ответ содержит ожидаемый JSON с задачами
+        String expectedResponse = "Сабтаска обновлена";
+        assertEquals(expectedResponse, response.body());
+    }
 }
+

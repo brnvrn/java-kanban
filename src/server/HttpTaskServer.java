@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HttpTaskServer {
@@ -62,6 +63,9 @@ public class HttpTaskServer {
                     case "/tasks/history/":
                         handleGetHistory(exchange);
                         break;
+                    case "/tasks/subtasks/epic/":
+                        handleGetSubtasksOfEpic(exchange);
+                        break;
                     case "/tasks/task/":
                     case "/tasks/subtask/":
                     case "/tasks/epic/":
@@ -87,9 +91,19 @@ public class HttpTaskServer {
             }
 
             if (requestMethod.equals("POST") && urlParts[1].equals("tasks") && urlParts.length == 3) {
-                handlePost(exchange);
+                switch (path) {
+                    case "/tasks/task/":
+                    case "/tasks/subtask/":
+                    case "/tasks/epic/":
+                        handlePost(exchange);
+                        break;
+                    default:
+                        handleUpdate(exchange);
+                        break;
+                }
             }
         }
+
 
         public void handleGet(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
@@ -167,6 +181,34 @@ public class HttpTaskServer {
             }
         }
 
+        public void handleGetSubtasksOfEpic(HttpExchange exchange) throws IOException {
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String path = exchange.getRequestURI().getPath();
+                String query = exchange.getRequestURI().getQuery();
+                String response = "";
+
+                String[] pathSegments = path.split("/");
+                if (pathSegments.length == 4 && query != null && query.startsWith("id=")) {
+                    int epicId = Integer.parseInt(query.substring(3));
+                    String entityType = pathSegments[3];
+
+                    if ("epic".equals(entityType)) {
+                        ArrayList<Subtask> subtasksOfEpic = (ArrayList<Subtask>) manager.getSubtasksOfEpic(epicId);
+                        response = subtasksOfEpic.toString();
+                    } else {
+                        response = "Неправильный эндпоинт";
+                    }
+
+                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                    OutputStream os = exchange.getResponseBody();
+                    os.write(response.getBytes());
+                    os.close();
+                } else {
+                    exchange.sendResponseHeaders(405, -1);
+                }
+            }
+        }
+
         public void handleGetPrioritizedTasks(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
@@ -212,6 +254,9 @@ public class HttpTaskServer {
                 exchange.sendResponseHeaders(405, -1); // Method Not Allowed
             }
         }
+
+
+
 
         public void handleDelete(HttpExchange exchange) throws IOException {
             if ("DELETE".equals(exchange.getRequestMethod())) {
@@ -321,6 +366,48 @@ public class HttpTaskServer {
             os.write(response.getBytes());
             os.close();
         }
+        private void handleUpdate(HttpExchange exchange) throws IOException {
+            String response = "";
+            int statusCode = 200;
+            try {
+                InputStream is = exchange.getRequestBody();
+                String reader = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                Task task;
+                Subtask subtask;
+                Epic epic;
+
+                switch (exchange.getRequestURI().getPath()) {
+                    case "/tasks/task":
+                        task = gson.fromJson(reader, Task.class);
+                        manager.updateTask(task);
+                        response = "Задача обновлена";
+                        break;
+                    case "/tasks/epic":
+                        epic = gson.fromJson(reader, Epic.class);
+                        manager.updateEpic(epic);
+                        response = "Эпик обновлен";
+                        break;
+                    case "/tasks/subtask":
+                        subtask = gson.fromJson(reader, Subtask.class);
+                        manager.updateSubtask(subtask);
+                        response = "Сабтаска обновлена";
+                        break;
+                    default:
+                        response = "Неправильный запрос";
+                        statusCode = 400;
+                        break;
+                }
+            } catch (JsonSyntaxException e) {
+                response = "Неправильный формат JSON";
+                statusCode = 400;
+            }
+
+            exchange.sendResponseHeaders(statusCode, response.getBytes().length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+
     }
 }
 

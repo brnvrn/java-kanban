@@ -46,7 +46,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         taskManager.getSubtask(2);
         System.out.println("Восстановленный список эпиков: " + taskManager.getEpics());
         System.out.println(taskManager.epics.get(subtask1.getEpicId()));
-        System.out.println(taskManager.getSubtasksOfEpic(epic1));
+        System.out.println(taskManager.getSubtasksOfEpic(epic1.getId()));
         System.out.println(taskManager.getTasks());
         // Создаем новый менеджер из файла
         FileBackedTasksManager newTaskManager = FileBackedTasksManager.loadFromFile(new File("data.csv"));

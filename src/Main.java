@@ -43,7 +43,7 @@ public class Main {
         httpManager.getTask(3);
         httpManager.getEpic(1);
         httpManager.getSubtask(2);
-        httpManager.saveToServer();
+        httpManager.save();
 
 
         httpManager = (HttpTaskManager) Managers.getDefault("http://localhost:8078");

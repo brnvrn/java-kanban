@@ -49,7 +49,7 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager>  {
         taskmanager.addNewEpic(epic1);
         taskmanager.addNewSubtask(subtask1);
         taskmanager.getTask(1);
-        taskmanager.saveToServer();
+        taskmanager.save();
 
         assertEquals(1,taskmanager.getTasks().size());
         assertEquals(1,taskmanager.getEpics().size());
@@ -60,7 +60,7 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager>  {
 
     @Test
     public void testSaveToServerWithEmpty() {
-        taskmanager.saveToServer();
+        taskmanager.save();
 
         assertEquals(0,taskmanager.getTasks().size());
         assertEquals(0,taskmanager.getEpics().size());
@@ -75,7 +75,7 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager>  {
         taskmanager.addNewEpic(epic1);
         taskmanager.addNewSubtask(subtask1);
         taskmanager.getTask(1);
-        taskmanager.saveToServer();
+        taskmanager.save();
        HttpTaskManager newHttpManager = (HttpTaskManager) Managers.getDefault("http://localhost:8078");
 
         newHttpManager.loadFromServer();
@@ -88,7 +88,7 @@ class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager>  {
     }
     @Test
     public void testLoadFromServerWithEmpty() {
-        taskmanager.saveToServer();
+        taskmanager.save();
         HttpTaskManager newHttpManager = (HttpTaskManager) Managers.getDefault("http://localhost:8078");
 
         newHttpManager.loadFromServer();

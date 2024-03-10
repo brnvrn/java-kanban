@@ -193,7 +193,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteEpic(int id) {
         Epic epic = epics.get(id);
         if (epic != null) {
-            ArrayList<Subtask> subtasksOfEpic = getSubtasksOfEpic(epic);
+            ArrayList<Subtask> subtasksOfEpic = getSubtasksOfEpic(epic.getId());
             epics.remove(id);
             for (Subtask subtask : subtasksOfEpic) {
                 subtasks.remove(subtask.getId());
@@ -219,9 +219,9 @@ public class InMemoryTaskManager implements TaskManager {
     //Дополнительные методы:
     //a. Получение списка всех подзадач определённого эпика.
     @Override
-    public ArrayList<Subtask> getSubtasksOfEpic(Epic epic) {
+    public ArrayList<Subtask> getSubtasksOfEpic(int epicId) {
         ArrayList<Subtask> subtasksOfEpic = new ArrayList<>();
-        ArrayList<Integer> subtaskIds = epic.getSubtaskIds();
+        ArrayList<Integer> subtaskIds = epics.get(epicId).getSubtaskIds();
 
         for (Integer subtaskId : subtaskIds) {
             if (subtasks.containsKey(subtaskId)) {
@@ -299,7 +299,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     protected void setEpicTime(Epic epic) {
-        List<Subtask> subtasks = getSubtasksOfEpic(epic);
+        List<Subtask> subtasks = getSubtasksOfEpic(epic.getId());
         if (!subtasks.isEmpty()) {
             LocalDateTime earliestStartTime = null;
             LocalDateTime latestEndTime = null;
