@@ -251,7 +251,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Задача с id 1 не найдена";
@@ -268,7 +268,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Задача с id 2 не найдена";
@@ -302,7 +302,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Эпик с id 1 не найден";
@@ -319,7 +319,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Эпик с id 2 не найден";
@@ -355,7 +355,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Сабтаска с id 1 не найдена";
@@ -373,7 +373,7 @@ HttpTaskServer httpTaskServer;
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         // Проверяем, что статус ответа равен 200 (OK)
-        assertEquals(200, response.statusCode());
+        assertEquals(400, response.statusCode());
 
         // Проверяем, что ответ содержит пустой список подзадач
         String expectedResponse = "Сабтаска с id 3 не найдена";
@@ -394,8 +394,9 @@ HttpTaskServer httpTaskServer;
         assertEquals(200, response.statusCode());
 
         // Проверяем, что ответ содержит ожидаемый JSON с задачами
-        String expectedResponse = "[Subtask{id=2, name='Subtask3', status=IN_PROGRESS, description='Dessubtask3'," +
-                " duration=45, startTime=2024-01-15T10:11}]";
+        String expectedResponse = "[{\"epicId\":1,\"id\":2,\"name\":\"Subtask3\",\"status\":\"IN_PROGRESS\"," +
+                "\"description\":\"Dessubtask3\",\"type\":\"SUBTASK\",\"duration\":45,\"startTime\":{\"date\":" +
+                "{\"year\":2024,\"month\":1,\"day\":15},\"time\":{\"hour\":10,\"minute\":11,\"second\":0,\"nano\":0}}}]";
         assertEquals(expectedResponse, response.body());
     }
 

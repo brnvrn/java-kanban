@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 public class HttpTaskServer {
@@ -50,8 +49,6 @@ public class HttpTaskServer {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String path = exchange.getRequestURI().getPath();
-            String response = "";
-            int statusCode = 200;
             String requestMethod = exchange.getRequestMethod();
             String[] urlParts = path.split("/");
 
@@ -108,33 +105,25 @@ public class HttpTaskServer {
         public void handleGet(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
-                String response = "";
 
                 if ("/tasks/task/".equals(path)) {
-                    response = gson.toJson(manager.getTasks());
+                    sendResponse(exchange, 200, gson.toJson(manager.getTasks()));
                 } else if ("/tasks/epic/".equals(path)) {
-                    response = gson.toJson(manager.getEpics());
+                    sendResponse(exchange, 200, gson.toJson(manager.getEpics()));
                 } else if ("/tasks/subtask/".equals(path)) {
-                    response = gson.toJson(manager.getSubtasks());
+                    sendResponse(exchange, 200, gson.toJson(manager.getSubtasks()));
                 } else {
-                    response = "Неправильный эндпоинт";
+                    sendResponse(exchange, 400, "Неправильный эндпоинт");
                 }
-
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
             } else {
-                exchange.sendResponseHeaders(405, -1);
+                sendResponse(exchange, 405, "");
             }
         }
-
 
         public void handleGetById(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
                 String query = exchange.getRequestURI().getQuery();
-                String response = "";
 
                 String[] pathSegments = path.split("/");
                 if (pathSegments.length == 3 && query != null && query.startsWith("id=")) {
@@ -144,40 +133,35 @@ public class HttpTaskServer {
                         case "task":
                             Task task = manager.getTask(id);
                             if (task != null) {
-                                response = gson.toJson(task);
+                                sendResponse(exchange, 200, gson.toJson(task));
                             } else {
-                                response = "Задача с id " + id + " не найдена";
+                                sendResponse(exchange, 400, "Задача с id " + id + " не найдена");
                             }
                             break;
                         case "epic":
                             Epic epic = manager.getEpic(id);
                             if (epic != null) {
-                                response = gson.toJson(epic);
+                                sendResponse(exchange, 200, gson.toJson(epic));
                             } else {
-                                response = "Эпик с id " + id + " не найден";
+                                sendResponse(exchange, 400, "Эпик с id " + id + " не найден");
                             }
                             break;
                         case "subtask":
                             Subtask subtask = manager.getSubtask(id);
                             if (subtask != null) {
-                                response = gson.toJson(subtask);
+                                sendResponse(exchange, 200, gson.toJson(subtask));
                             } else {
-                                response = "Сабтаска с id " + id + " не найдена";
+                                sendResponse(exchange, 400, "Сабтаска с id " + id + " не найдена");
                             }
                             break;
                         default:
-                            response = "Неправильный тип";
+                            sendResponse(exchange, 400, "Неправильный тип");
                     }
                 } else {
-                    response = "Неправильный эндпоинт";
+                    sendResponse(exchange, 400, "Неправильный эндпоинт");
                 }
-
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
             } else {
-                exchange.sendResponseHeaders(405, -1);
+                sendResponse(exchange, 405, "");
             }
         }
 
@@ -185,7 +169,6 @@ public class HttpTaskServer {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
                 String query = exchange.getRequestURI().getQuery();
-                String response = "";
 
                 String[] pathSegments = path.split("/");
                 if (pathSegments.length == 4 && query != null && query.startsWith("id=")) {
@@ -193,18 +176,15 @@ public class HttpTaskServer {
                     String entityType = pathSegments[3];
 
                     if ("epic".equals(entityType)) {
-                        ArrayList<Subtask> subtasksOfEpic = (ArrayList<Subtask>) manager.getSubtasksOfEpic(epicId);
-                        response = subtasksOfEpic.toString();
+                        List<Subtask> subtasksOfEpic = manager.getSubtasksOfEpic(epicId);
+                        Gson gson = new Gson();
+                        sendResponse(exchange, 200, gson.toJson(subtasksOfEpic));
                     } else {
-                        response = "Неправильный эндпоинт";
+                        sendResponse(exchange, 400, "Неправильный эндпоинт");
                     }
 
-                    exchange.sendResponseHeaders(200, response.getBytes().length);
-                    OutputStream os = exchange.getResponseBody();
-                    os.write(response.getBytes());
-                    os.close();
                 } else {
-                    exchange.sendResponseHeaders(405, -1);
+                    sendResponse(exchange, 405, "");
                 }
             }
         }
@@ -212,76 +192,52 @@ public class HttpTaskServer {
         public void handleGetPrioritizedTasks(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
-                String response = "";
-                int statusCode = 200;
 
                 if ("/tasks/".equals(path)) {
                     List<Task> prioritizedTasks = manager.getPrioritizedTasks();
-                    response = gson.toJson(prioritizedTasks);
+                    sendResponse(exchange, 200, gson.toJson(prioritizedTasks));
                 } else {
-                    statusCode = 404;
-                    response = "Неправильный эндпоинт";
+                    sendResponse(exchange, 400, "Неправильный эндпоинт");
                 }
 
-                exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
-                }
             } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+                sendResponse(exchange, 405, "");
             }
         }
 
         public void handleGetHistory(HttpExchange exchange) throws IOException {
             if ("GET".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
-                String response = "";
-                int statusCode = 200;
 
                 if ("/tasks/history/".equals(path)) {
                     List<Task> history = manager.getHistory();
-                    response = gson.toJson(history);
+                    sendResponse(exchange, 200, gson.toJson(history));
                 } else {
-                    statusCode = 404; // Not Found
-                    response = "Неправильный эндпоинт";
-                }
-
-                exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
+                    sendResponse(exchange, 400, "Неправильный эндпоинт");
                 }
             } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+                sendResponse(exchange, 405, "");
             }
         }
-
-
-
 
         public void handleDelete(HttpExchange exchange) throws IOException {
             if ("DELETE".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
-                String response = "";
 
                 if ("/tasks/task/".equals(path)) {
                     manager.removeAllTasks();
-                    response = "Все задачи удалены";
+                    sendResponse(exchange, 200, "Все задачи удалены");
                 } else if ("/tasks/epic/".equals(path)) {
                     manager.removeAllEpics();
-                    response = "Все эпики удалены";
+                    sendResponse(exchange, 200, "Все эпики удалены");
                 } else if ("/tasks/subtask/".equals(path)) {
                     manager.removeAllSubtasks();
-                    response = "Все сабтаски удалены";
+                    sendResponse(exchange, 200, "Все сабтаски удалены");
                 } else {
-                    response = "Неправильный эндпоинт";
+                    sendResponse(exchange, 400, "Неправильный эндпоинт");
                 }
-
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
             } else {
-                exchange.sendResponseHeaders(405, -1);
+                sendResponse(exchange, 405, "");
             }
         }
 
@@ -289,7 +245,6 @@ public class HttpTaskServer {
             if ("DELETE".equals(exchange.getRequestMethod())) {
                 String path = exchange.getRequestURI().getPath();
                 String query = exchange.getRequestURI().getQuery();
-                String response = "";
 
                 String[] pathSegments = path.split("/");
                 if (pathSegments.length == 3 && query != null && query.startsWith("id=")) {
@@ -298,36 +253,31 @@ public class HttpTaskServer {
                     switch (entityType) {
                             case "task":
                                 manager.deleteTask(id);
-                                response = "Задача с id " + id + " удалена";
+                                sendResponse(exchange, 200, "Задача с id " + id + " удалена");
                                 break;
                             case "epic":
                                 manager.deleteEpic(id);
-                                response = "Эпик с id " + id + " удален";
+                                sendResponse(exchange, 200, "Эпик с id " + id + " удален");
                                 break;
                             case "subtask":
                                 manager.deleteSubtask(id);
-                                response = "Сабтаска с id " + id + " удалена";
+                                sendResponse(exchange, 200, "Сабтаска с id " + id + " удалена");
                                 break;
                             default:
-                                response = "Неправильный тип";
+                                sendResponse(exchange, 400, "Неправильный тип");
                                 break;
-                        }
-                    } else {
-                        response = "Неправильный URL формат";
                     }
 
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
+                } else {
+                    sendResponse(exchange, 400, "Неправильный URL формат");
+                }
+
             } else {
-                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+                sendResponse(exchange, 405, "");
             }
         }
 
         private void handlePost(HttpExchange exchange) throws IOException {
-            String response = "";
-            int statusCode = 200;
             try {
                 InputStream is = exchange.getRequestBody();
                 String reader = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -339,36 +289,28 @@ public class HttpTaskServer {
                     case "/tasks/task/":
                         task = gson.fromJson(reader, Task.class);
                         manager.addNewTask(task);
-                        response = "Задача создана";
+                        sendResponse(exchange, 200, "Задача создана");
                         break;
                     case "/tasks/epic/":
                         epic = gson.fromJson(reader, Epic.class);
                         manager.addNewEpic(epic);
-                        response = "Эпик создан";
+                        sendResponse(exchange, 200, "Эпик создан");
                         break;
                     case "/tasks/subtask/":
                         subtask = gson.fromJson(reader, Subtask.class);
                         manager.addNewSubtask(subtask);
-                        response = "Сабтаска создана";
-                        break;
+                        sendResponse(exchange, 200, "Сабтаска создана");
+                       break;
                     default:
-                        response = "Неправильный запрос";
-                        statusCode = 400;
+                        sendResponse(exchange, 400, "Неправильный запрос");
                         break;
                 }
             } catch (JsonSyntaxException e) {
-                response = "Неправильный формат JSON";
-                statusCode = 400;
+                sendResponse(exchange, 400, "Неправильный формат JSON");
             }
-
-            exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
         }
+
         private void handleUpdate(HttpExchange exchange) throws IOException {
-            String response = "";
-            int statusCode = 200;
             try {
                 InputStream is = exchange.getRequestBody();
                 String reader = new String(is.readAllBytes(), StandardCharsets.UTF_8);
@@ -380,34 +322,32 @@ public class HttpTaskServer {
                     case "/tasks/task":
                         task = gson.fromJson(reader, Task.class);
                         manager.updateTask(task);
-                        response = "Задача обновлена";
+                        sendResponse(exchange, 200, "Задача обновлена");
                         break;
                     case "/tasks/epic":
                         epic = gson.fromJson(reader, Epic.class);
                         manager.updateEpic(epic);
-                        response = "Эпик обновлен";
+                        sendResponse(exchange, 200, "Эпик обновлен");
                         break;
                     case "/tasks/subtask":
                         subtask = gson.fromJson(reader, Subtask.class);
                         manager.updateSubtask(subtask);
-                        response = "Сабтаска обновлена";
+                        sendResponse(exchange, 200, "Сабтаска обновлена");
                         break;
                     default:
-                        response = "Неправильный запрос";
-                        statusCode = 400;
+                        sendResponse(exchange, 400, "Неправильный запрос");
                         break;
                 }
             } catch (JsonSyntaxException e) {
-                response = "Неправильный формат JSON";
-                statusCode = 400;
+                sendResponse(exchange, 400, "Неправильный формат JSON");
             }
-
-            exchange.sendResponseHeaders(statusCode, response.getBytes().length);
+        }
+        private void sendResponse(HttpExchange exchange, int responseCode, String response) throws IOException {
+            exchange.sendResponseHeaders(responseCode, response.getBytes().length);
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
         }
-
     }
 }
 
